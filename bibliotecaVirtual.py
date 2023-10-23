@@ -1,4 +1,6 @@
-import os
+#------------------------- ANTES ---------------------------------------#
+
+"""import os
 from libro import Libro
 
 class BibliotecaVirtual:
@@ -54,3 +56,74 @@ class BibliotecaVirtual:
                 print(f"'{titulo}' ya está disponible en la biblioteca.")
         else:
             print(f"'{titulo}' no se encuentra en la biblioteca.")
+"""
+
+#------------------------------------  DESPUÉS -----------------------------------------------------------#
+
+
+from libro import Libro
+import os
+
+class Biblioteca:
+    def _init_(self):
+        self.libros = {}
+
+    def cargar_desde_archivo(self, nombre_archivo):
+        if os.path.exists(nombre_archivo):
+            with open(nombre_archivo, "r") as archivo:
+                for linea in archivo:
+                    datos = linea.strip().split(", ")
+                    titulo, autor, disponibilidad = datos[0], datos[1], datos[2]
+                    libro = Libro(titulo, autor, disponibilidad == "Disponible")
+                    self.libros[titulo] = libro
+
+    def guardar_en_archivo(self, nombre_archivo):
+        with open(nombre_archivo, "w") as archivo:
+            for libro in self.libros.values():
+                disponibilidad = "Disponible" if libro.disponible else "No disponible"
+                archivo.write(f"{libro.titulo}, {libro.autor}, {disponibilidad}\n")
+
+    def agregar_libro(self, libro):
+        self.libros[libro.titulo] = libro
+
+    def obtener_libro(self, titulo):
+        return self.libros.get(titulo)
+
+class BibliotecaVirtual:
+    def _init_(self):
+        self.biblioteca = Biblioteca()
+        self.biblioteca.cargar_desde_archivo("biblioteca.txt")
+
+    def mostrar_biblioteca(self):
+        for titulo, libro in self.biblioteca.libros.items():
+            print(f"\n{libro}")
+
+    def pedir_libro(self, titulo, tipo_usuario):
+        nombre = input("Ingresa tu nombre: ")
+        libro = self.biblioteca.obtener_libro(titulo)
+        if libro:
+            self._realizar_prestamo(libro, nombre, tipo_usuario)
+        else:
+            print(f"'{titulo}' no se encuentra en la biblioteca.")
+
+    def devolver_libro(self, titulo):
+        nombre = input("Ingresa tu nombre: ")
+        libro = self.biblioteca.obtener_libro(titulo)
+        if libro:
+            self._realizar_devolucion(libro, nombre)
+        else:
+            print(f"'{titulo}' no se encuentra en la biblioteca.")
+
+    def _realizar_prestamo(self, libro, nombre, tipo_usuario):
+        if libro.disponible:
+            print(f"{nombre} ha pedido prestado '{libro.titulo}'!")
+            libro.disponible = False
+        else:
+            print(f"'{libro.titulo}' no está disponible en este momento.")
+
+    def _realizar_devolucion(self, libro, nombre):
+        if not libro.disponible:
+            print(f"{nombre} ha devuelto '{libro.titulo}'. Gracias por regresarlo.")
+            libro.disponible = True
+        else:
+            print(f"'{libro.titulo}' ya está disponible en la biblioteca.")
